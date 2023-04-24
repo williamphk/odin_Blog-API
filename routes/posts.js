@@ -41,6 +41,31 @@ router.get(
   }
 );
 
+/* GET comment with id for post with id. */
+router.get("/:postId/comments/:commentId", async (req, res, next) => {
+  try {
+    const comment = await Comment.find({
+      _id: req.params.commentId,
+      post: req.params.postId,
+    }).populate("post");
+    res.json({ comment });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/* GET all comments for post with id. */
+router.get("/:id/comments", async (req, res, next) => {
+  try {
+    const comments = await Comment.find({ post: req.params.id }).populate(
+      "post"
+    );
+    res.json({ comments });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 /* GET post with id. */
 router.get("/:id", async (req, res, next) => {
   try {
@@ -51,19 +76,39 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-/* GET all comments for post with id. */
-router.get("/:id/comments", async (req, res, next) => {
-  try {
-    const comments = await Comment.find(
-      { post: req.params.id }.populate("post")
-    );
-    res.json({ comments });
-  } catch (err) {
-    return next(err);
-  }
-});
-
-/* POST comments. */
+/* POST comments post with id. */
+router.post("/:id/comments", [
+  body("email")
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Invalid email")
+    .normalizeEmail(),
+  body("content")
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("Content is required")
+    .escape(),
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    const comment = new Comment({
+      email: req.body.email,
+      content: req.body.content,
+      timestamp: new Date(),
+      post: req.params.id,
+    });
+    if (!errors.isEmpty()) {
+      return res.status(401).json({ comment, errors: errors.array() });
+    }
+    try {
+      await comment.save();
+      res.status(200).json({ message: "Comment created" });
+    } catch (err) {
+      return next(err);
+    }
+  },
+]);
 
 /* POST post. */
 router.post("/", passport.authenticate("jwt", { session: false }), [
@@ -154,10 +199,22 @@ router.delete(
 
 /* Delete comment with id. */
 router.delete(
-  "/comment/:id",
+  "/:postId/comments/:commentId",
   passport.authenticate("jwt", { session: false }),
-  (req, res, next) => {
-    res.json({ title: "deleted comment" });
+  async (req, res, next) => {
+    try {
+      const comment = await Post.find({
+        _id: req.params.commentId,
+        post: req.params.postId,
+      }).populate("post");
+      if (comment == null) {
+        return res.status(401).json({ message: "Comment not found" });
+      }
+      await Comment.deleteOne({ _id: req.params.commentId });
+      return res.status(200).json({ message: "Comment deleted" });
+    } catch (err) {
+      next(err);
+    }
   }
 );
 

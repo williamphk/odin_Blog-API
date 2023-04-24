@@ -6,7 +6,7 @@ const CommentSchema = new Schema({
   email: { type: String, required: true },
   content: { type: String, required: true },
   timestamp: { type: Date },
-  post: { type: Schema.Types.ObjectId, ref: "post" },
+  post: { type: Schema.Types.ObjectId, ref: "Post" },
 });
 
 //Export model
