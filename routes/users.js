@@ -88,7 +88,7 @@ router.post("/", [
       user.password = hashedPassword;
       try {
         await user.save();
-        res.json({ title: "created user" });
+        res.status(200).json({ message: "User created" });
       } catch (err) {
         return next(err);
       }
@@ -162,7 +162,7 @@ router.put("/:id", [
       user.password = hashedPassword;
       try {
         await User.updateOne({ _id: req.params.id }, user);
-        res.json({ title: "updated user" });
+        return res.status(200).json({ message: "User Updated" });
       } catch (err) {
         return next(err);
       }
@@ -175,10 +175,10 @@ router.delete("/:id", async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (user == null) {
-      res.json("User not found");
+      return res.status(401).json({ message: "User not found" });
     }
     await User.deleteOne({ _id: req.params.id });
-    res.json("User deleted");
+    return res.status(200).json({ message: "User deleted" });
   } catch (err) {
     next(err);
   }

@@ -16,7 +16,7 @@ var app = express();
 
 // Set up mongoose connection
 mongoose.set("strictQuery", false);
-const mongoDB = `mongodb+srv://inventory-admin:${process.env.SECRET_KEY}@cluster0.ynqmqjk.mongodb.net/blog?retryWrites=true&w=majority`;
+const mongoDB = `mongodb+srv://inventory-admin:${process.env.MONGO_SECRET_KEY}@cluster0.ynqmqjk.mongodb.net/blog?retryWrites=true&w=majority`;
 
 main().catch((err) => console.log(err));
 async function main() {
@@ -32,6 +32,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+//passport configuration
+const passport = require("passport");
+const jwtStrategry = require("./strategies/jwt");
+passport.use(jwtStrategry);
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);

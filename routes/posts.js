@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+const passport = require("passport");
 
 /* GET post with id. */
 router.get("/:id", function (req, res, next) {
@@ -12,9 +13,13 @@ router.get("/", function (req, res, next) {
 });
 
 /* POST post. */
-router.post("/", function (req, res, next) {
-  res.json({ title: "created post" });
-});
+router.post(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  (req, res, next) => {
+    return res.status(200).json({ message: "YAY! this is a protected Route" });
+  }
+);
 
 /* PUT post with id. */
 router.put("/:id", function (req, res, next) {
