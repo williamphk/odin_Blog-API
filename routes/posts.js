@@ -1,29 +1,29 @@
 var express = require("express");
 var router = express.Router();
 
-/* GET user with id. */
+/* GET post with id. */
 router.get("/:id", function (req, res, next) {
-  res.json({ title: "users" });
+  res.json({ title: "posts" });
 });
 
-/* GET users listing. */
+/* GET posts listing. */
 router.get("/", function (req, res, next) {
-  res.json({ title: "users" });
+  res.json({ title: "posts" });
 });
 
-/* POST user. */
+/* POST post. */
 router.post("/", function (req, res, next) {
-  res.json({ title: "created user" });
+  res.json({ title: "created post" });
 });
 
-/* PUT user with id. */
+/* PUT post with id. */
 router.put("/:id", function (req, res, next) {
-  res.json({ title: "updated user" });
+  res.json({ title: "updated post" });
 });
 
-/* DELETE user with id. */
+/* DELETE post with id. */
 router.delete("/:id", function (req, res, next) {
-  res.json({ title: "deleted user" });
+  res.json({ title: "deleted post" });
 });
 
 module.exports = router;
