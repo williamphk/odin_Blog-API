@@ -81,8 +81,7 @@ router.post("/", [
     });
 
     if (!errors.isEmpty()) {
-      res.json({ user, errors: errors.array() });
-      return next(errors);
+      return res.status(401).json({ user, errors: errors.array() });
     }
     bcrypt.hash(user.password, 10, async (err, hashedPassword) => {
       user.password = hashedPassword;

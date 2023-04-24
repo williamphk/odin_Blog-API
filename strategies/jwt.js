@@ -11,7 +11,9 @@ opts.secretOrKey = `${process.env.SECRET}`; //normally store this in process.env
 module.exports = new JwtStrategy(opts, async (jwt_payload, done) => {
   try {
     // Find the user with the email from the JWT payload
-    const user = await User.findOne({ email: jwt_payload.email });
+    const user = await User.findOne({
+      email: jwt_payload.email,
+    });
     // If a user with the provided email is found, consider the request authenticated
     if (user) {
       return done(null, user);

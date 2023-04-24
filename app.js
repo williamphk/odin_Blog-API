@@ -9,7 +9,6 @@ require("dotenv").config();
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var loginRouter = require("./routes/login");
-var logoutRouter = require("./routes/logout");
 var postsRouter = require("./routes/posts");
 
 var app = express();
@@ -41,7 +40,6 @@ passport.use(jwtStrategry);
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/login", loginRouter);
-app.use("/logout", logoutRouter);
 app.use("/posts", postsRouter);
 
 // catch 404 and forward to error handler

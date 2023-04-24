@@ -10,9 +10,5 @@ const PostSchema = new Schema({
   isPublic: { type: Boolean },
 });
 
-PostSchema.virtual("url").get(function () {
-  return `/posts/${this._id}`;
-});
-
 //Export model
 module.exports = mongoose.model("Post", PostSchema);

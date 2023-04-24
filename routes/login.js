@@ -14,7 +14,7 @@ router.post("/", async (req, res, next) => {
     const user = await User.findOne({ email });
     // If the user is not found, return with a message
     if (!user) {
-      return res.status(401).json({ message: "Incorrect username" });
+      return res.status(401).json({ message: "Incorrect email" });
     }
 
     // Compare the provided password with the stored hashed password
@@ -25,10 +25,8 @@ router.post("/", async (req, res, next) => {
 
       if (result) {
         // If the passwords match, log the user in
-        const opts = {};
-        opts.expiresIn = 120; //token expires in 2min
         const secret = `${process.env.SECRET}`;
-        const token = jwt.sign({ email }, secret, opts);
+        const token = jwt.sign({ email }, secret, { expiresIn: "1h" });
         return res.status(200).json({
           message: "Login successful",
           token,
