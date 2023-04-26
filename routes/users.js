@@ -7,8 +7,13 @@ const { body, validationResult } = require("express-validator");
 var bcrypt = require("bcryptjs");
 
 /* GET user with id. */
-router.get("/:id", function (req, res, next) {
-  res.json({ title: "users" });
+router.get("/:id", async (req, res, next) => {
+  try {
+    const user = User.findById(req.params.id, "first_name last_name email");
+    res.json({ user });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 /* GET users listing. */
