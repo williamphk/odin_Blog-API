@@ -186,11 +186,17 @@ router.delete(
   async (req, res, next) => {
     try {
       const post = await Post.findById(req.params.id);
+      const comments = await Comment.find({ post: req.params.id });
       if (post == null) {
         return res.status(401).json({ message: "Post not found" });
       }
       await Post.deleteOne({ _id: req.params.id });
-      return res.status(200).json({ message: "Post deleted" });
+      if (comments) {
+        await Comment.deleteMany({ post: req.params.id });
+      }
+      return res
+        .status(200)
+        .json({ message: "Post and related comments deleted" });
     } catch (err) {
       next(err);
     }
@@ -203,7 +209,7 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     try {
-      const comment = await Post.find({
+      const comment = await Comment.find({
         _id: req.params.commentId,
         post: req.params.postId,
       }).populate("post");
