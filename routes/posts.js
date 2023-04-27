@@ -6,6 +6,8 @@ const createDOMPurify = require("dompurify");
 const window = new JSDOM("").window;
 const DOMPurify = createDOMPurify(window);
 
+const sanitizeHtml = require("sanitize-html");
+
 const { body, validationResult } = require("express-validator");
 
 const Post = require("../models/post");
@@ -98,39 +100,28 @@ router.post(
   ],
 
   async (req, res, next) => {
-    // Sanitize input
-    const allowedTags = [
-      "h1",
-      "h2",
-      "h3",
-      "h4",
-      "h5",
-      "h6",
-      "p",
-      "strong",
-      "em",
-      "u",
-      "strike",
-      "blockquote",
-      "ul",
-      "ol",
-      "li",
-      "a",
-      "img",
-      "pre",
-      "code",
-      "br",
-    ];
-
-    const allowedAttributes = {
-      a: ["href", "title", "target"],
-      img: ["src", "alt", "title", "width", "height"],
-      span: ["style"], // Add this line to allow the 'style' attribute for 'span' elements
-    };
-
-    const sanitizedContent = DOMPurify.sanitize(req.body.content, {
-      ALLOWED_TAGS: allowedTags,
-      ALLOWED_ATTR: allowedAttributes,
+    //Sanitize Html
+    const sanitizedContent = sanitizeHtml(req.body.content, {
+      allowedTags: ["p", "span"],
+      allowedAttributes: {
+        p: ["style"],
+        span: ["style"],
+      },
+      allowedStyles: {
+        "*": {
+          // Match HEX and RGB
+          color: [
+            /^#(0x)?[0-9a-f]+$/i,
+            /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/,
+          ],
+          "text-align": [/^left$/, /^right$/, /^center$/],
+          // Match any number with px, em, or %
+          "font-size": [/^\d+(?:px|em|%)$/],
+        },
+        p: {
+          "font-size": [/^\d+rem$/],
+        },
+      },
     });
 
     const errors = validationResult(req);
@@ -169,39 +160,28 @@ router.post(
   ],
 
   async (req, res, next) => {
-    // Sanitize input
-    const allowedTags = [
-      "h1",
-      "h2",
-      "h3",
-      "h4",
-      "h5",
-      "h6",
-      "p",
-      "strong",
-      "em",
-      "u",
-      "strike",
-      "blockquote",
-      "ul",
-      "ol",
-      "li",
-      "a",
-      "img",
-      "pre",
-      "code",
-      "br",
-    ];
-
-    const allowedAttributes = {
-      a: ["href", "title", "target"],
-      img: ["src", "alt", "title", "width", "height"],
-      span: ["style"], // Add this line to allow the 'style' attribute for 'span' elements
-    };
-
-    const sanitizedContent = DOMPurify.sanitize(req.body.content, {
-      ALLOWED_TAGS: allowedTags,
-      ALLOWED_ATTR: allowedAttributes,
+    //Sanitize Html
+    const sanitizedContent = sanitizeHtml(req.body.content, {
+      allowedTags: ["p", "span"],
+      allowedAttributes: {
+        p: ["style"],
+        span: ["style"],
+      },
+      allowedStyles: {
+        "*": {
+          // Match HEX and RGB
+          color: [
+            /^#(0x)?[0-9a-f]+$/i,
+            /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/,
+          ],
+          "text-align": [/^left$/, /^right$/, /^center$/],
+          // Match any number with px, em, or %
+          "font-size": [/^\d+(?:px|em|%)$/],
+        },
+        p: {
+          "font-size": [/^\d+rem$/],
+        },
+      },
     });
 
     const errors = validationResult(req);
