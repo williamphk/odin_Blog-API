@@ -1,10 +1,6 @@
 var express = require("express");
 var router = express.Router();
 const passport = require("passport");
-const { JSDOM } = require("jsdom");
-const createDOMPurify = require("dompurify");
-const window = new JSDOM("").window;
-const DOMPurify = createDOMPurify(window);
 
 const sanitizeHtml = require("sanitize-html");
 
