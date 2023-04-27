@@ -1,6 +1,10 @@
 var express = require("express");
 var router = express.Router();
 const passport = require("passport");
+const { JSDOM } = require("jsdom");
+const createDOMPurify = require("dompurify");
+const window = new JSDOM("").window;
+const DOMPurify = createDOMPurify(window);
 
 const { body, validationResult } = require("express-validator");
 
@@ -77,24 +81,62 @@ router.get("/:id", async (req, res, next) => {
 });
 
 /* POST comments post with id. */
-router.post("/:id/comments", [
-  body("email")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Email is required")
-    .isEmail()
-    .withMessage("Invalid email")
-    .normalizeEmail(),
-  body("content")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Content is required")
-    .escape(),
+router.post(
+  "/:id/comments",
+  [
+    body("email")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Invalid email")
+      .normalizeEmail(),
+    body("content")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Content is required"),
+  ],
+
   async (req, res, next) => {
+    // Sanitize input
+    const allowedTags = [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "p",
+      "strong",
+      "em",
+      "u",
+      "strike",
+      "blockquote",
+      "ul",
+      "ol",
+      "li",
+      "a",
+      "img",
+      "pre",
+      "code",
+      "br",
+    ];
+
+    const allowedAttributes = {
+      a: ["href", "title", "target"],
+      img: ["src", "alt", "title", "width", "height"],
+      span: ["style"], // Add this line to allow the 'style' attribute for 'span' elements
+    };
+
+    const sanitizedContent = DOMPurify.sanitize(req.body.content, {
+      ALLOWED_TAGS: allowedTags,
+      ALLOWED_ATTR: allowedAttributes,
+    });
+
     const errors = validationResult(req);
     const comment = new Comment({
       email: req.body.email,
-      content: req.body.content,
+      content: sanitizedContent,
       timestamp: new Date(),
       post: req.params.id,
     });
@@ -107,26 +149,65 @@ router.post("/:id/comments", [
     } catch (err) {
       return next(err);
     }
-  },
-]);
+  }
+);
 
 /* POST post. */
-router.post("/", passport.authenticate("jwt", { session: false }), [
-  body("title")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Topic is required")
-    .escape(),
-  body("content")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Content is required")
-    .escape(),
+router.post(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  [
+    body("title")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Topic is required")
+      .escape(),
+    body("content")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Content is required"),
+  ],
+
   async (req, res, next) => {
+    // Sanitize input
+    const allowedTags = [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "p",
+      "strong",
+      "em",
+      "u",
+      "strike",
+      "blockquote",
+      "ul",
+      "ol",
+      "li",
+      "a",
+      "img",
+      "pre",
+      "code",
+      "br",
+    ];
+
+    const allowedAttributes = {
+      a: ["href", "title", "target"],
+      img: ["src", "alt", "title", "width", "height"],
+      span: ["style"], // Add this line to allow the 'style' attribute for 'span' elements
+    };
+
+    const sanitizedContent = DOMPurify.sanitize(req.body.content, {
+      ALLOWED_TAGS: allowedTags,
+      ALLOWED_ATTR: allowedAttributes,
+    });
+
     const errors = validationResult(req);
     const post = new Post({
       title: req.body.title,
-      content: req.body.content,
+      content: sanitizedContent,
       timestamp: new Date(),
       created_by: req.user._id,
       isPublic: req.body.isPublic,
@@ -134,27 +215,27 @@ router.post("/", passport.authenticate("jwt", { session: false }), [
     if (!errors.isEmpty()) {
       return res.status(401).json({ post, errors: errors.array() });
     }
+
     try {
       await post.save();
       res.status(200).json({ message: "Post created", post });
     } catch (err) {
       return next(err);
     }
-  },
-]);
+  }
+);
 
 /* PUT post with id. */
-router.put("/:id", passport.authenticate("jwt", { session: false }), [
-  body("title")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Topic is required")
-    .escape(),
-  body("content")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Content is required")
-    .escape(),
+router.put(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  [
+    body("title").trim().isLength({ min: 1 }).withMessage("Topic is required"),
+    body("content")
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage("Content is required"),
+  ],
   async (req, res, next) => {
     const errors = validationResult(req);
     const post = new Post({
@@ -176,8 +257,8 @@ router.put("/:id", passport.authenticate("jwt", { session: false }), [
     } catch (err) {
       return next(err);
     }
-  },
-]);
+  }
+);
 
 /* DELETE post with id. */
 router.delete(
