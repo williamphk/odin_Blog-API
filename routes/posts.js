@@ -136,7 +136,7 @@ router.post("/", passport.authenticate("jwt", { session: false }), [
     }
     try {
       await post.save();
-      res.status(200).json({ message: "Post created" });
+      res.status(200).json({ message: "Post created", post });
     } catch (err) {
       return next(err);
     }
